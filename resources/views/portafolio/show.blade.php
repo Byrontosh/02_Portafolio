@@ -17,7 +17,10 @@
     <h5 class="card-title">Nombre: {{ $portafolio->nombre }}</h5>
     <h5 class="card-title">Descripción: {{ $portafolio->descripcion }}</h5>
     <h5 class="card-title">Categoría: {{ $portafolio->categoria }}</h5>
-    <h5 class="card-title">Imagen: {{ $portafolio->imagen }}</h5>
+    <h5 class="card-title">Imagen:</h5>
+    <img class="img-fluid img-thumbnail" src="/storage/{{$portafolio->imagen }}" alt="img-proyecto" width="200" height="200">
+    <br>
+    <br>
     <h5 class="card-title">Vídeo: {{ $portafolio->url }}</h5>
     <a href="{{route('edit',$portafolio)}}" class="btn btn-success btn-sm" >Actualizar</a>
     <form action="{{route('destroy',$portafolio)}}" method="POST" style="display: inline;" onsubmit="return confirmation()">

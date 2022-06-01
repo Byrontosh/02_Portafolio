@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Portafolio;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class PortafolioController extends Controller
 {
@@ -20,6 +21,16 @@ class PortafolioController extends Controller
 
 
     }
+
+    public function datosPortafolio()
+    {
+        $portafolios = Portafolio::all();
+
+        return view('welcome',compact('portafolios'));
+    }
+
+
+    
 
     /**
      * Show the form for creating a new resource.
@@ -39,11 +50,24 @@ class PortafolioController extends Controller
      */
     public function store(Request $request)
     {
+        request()->validate([
+            'nombre'=>'required|max:50',
+            'descripcion'=>'required|string|max:50',
+            'categoria'=>'required | string | max:15',
+            'imagen'=>'required | max:2000 | mimes:jpge,png,jpg',
+            'video'=>'required  | max:100',
+        ],[
+            'required'=>'El campo :attribute es obligatorio',
+            'imagen.mimes'=>'La imagen debe ser de tipo: jpge, png, jpg.',
+        ]);
+
+
+
         Portafolio::create([
             'nombre'=> request('nombre'),
             'descripcion'=> request('descripcion'),
             'categoria'=> request('categoria'),
-            'imagen'=> request('imagen'),
+            'imagen'=> request()->file('imagen')->store('images','public'),
             'url'=> request('video')
         ]);
 
@@ -87,15 +111,30 @@ class PortafolioController extends Controller
      */
     public function update(Portafolio $portafolio)
     {
-        $portafolio->update([
-            'nombre'=> request('nombre'),
-            'descripcion'=> request('descripcion'),
-            'categoria'=> request('categoria'),
-            'imagen'=> request('imagen'),
-            'url'=> request('video')
-        ]);
+        if(request()->hasFile('imagen'))
+        {
+            Storage::disk('public')->delete($portafolio->imagen);
 
+            $portafolio->update([
+                'nombre'=> request('nombre'),
+                'descripcion'=> request('descripcion'),
+                'categoria'=> request('categoria'),
+                'imagen'=> request()->file('imagen')->store('images','public'),
+                'url'=> request('video')
+            ]);
+        }
+        else
+        {
+            $portafolio->update([
+                'nombre'=> request('nombre'),
+                'descripcion'=> request('descripcion'),
+                'categoria'=> request('categoria'),
+                'url'=> request('video')
+            ]);
+        }
         return redirect()->route('show',$portafolio);
+
+
     }
 
 
@@ -108,6 +147,7 @@ class PortafolioController extends Controller
      */
     public function destroy(Portafolio $portafolio)
     {
+        Storage::disk('public')->delete($portafolio->imagen);
         $portafolio ->delete();
         return redirect()->route('portafolio');
     }
